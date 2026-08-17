@@ -111,6 +111,7 @@ a{text-decoration:none;color:inherit;}
   justify-content:center;gap:.55rem;padding:.9rem 1.5rem;border-radius:999px;border:1px solid transparent;
   transition:transform .22s ease,background .22s ease,color .22s ease,border-color .22s ease;cursor:pointer;
 }
+.ty-btn[hidden]{display:none;} /* display:inline-flex above would otherwise beat the hidden attribute */
 .ty-btn svg{width:1.05em;height:1.05em;flex:none;}
 .ty-btn-primary{background:var(--regen);color:#fff;box-shadow:0 14px 30px -12px rgba(156,24,86,.55);}
 .ty-btn-primary:hover{background:var(--regen-dark);color:#fff;transform:translateY(-2px);}
@@ -138,6 +139,7 @@ a{text-decoration:none;color:inherit;}
 <symbol id="t-check" viewBox="0 0 24 24"><path d="M4.5 12.5l5 5L19.5 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="t-home" viewBox="0 0 24 24"><path d="M3.5 10.5 12 3.5l8.5 7M5.5 9.5V20h13V9.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="t-ext" viewBox="0 0 24 24"><path d="M9 6H5.5A1.5 1.5 0 0 0 4 7.5v11A1.5 1.5 0 0 0 5.5 20h11a1.5 1.5 0 0 0 1.5-1.5V15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M13 4h7v7M20 4l-9.5 9.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="t-dl" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="t-chat" viewBox="0 0 24 24"><path d="M12 3.5c-4.7 0-8.5 3.4-8.5 7.5 0 2.1 1 4 2.6 5.3-.1 1-.5 2.3-1.3 3.2 1.4 0 2.9-.5 4-1.3 1 .3 2.1.5 3.2.5 4.7 0 8.5-3.4 8.5-7.7s-3.8-7.5-8.5-7.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
 </defs></svg>
 
@@ -167,6 +169,7 @@ a{text-decoration:none;color:inherit;}
   </section>
 
   <div class="ty-actions">
+    <a href="Congress-Passport-CMYK-PRESS.pdf" download="IASRM-Longevity-Revolution-2026-Brochure.pdf" id="ty-brochure" class="ty-btn ty-btn-primary" hidden><svg><use href="#t-dl" xlink:href="#t-dl"></use></svg>Download Brochure</a>
     <a href="index.html" class="ty-btn ty-btn-primary"><svg><use href="#t-home" xlink:href="#t-home"></use></svg>Return to Home</a>
     <a href="https://iasrmglobal.org/conference/register/conference/1/" target="_blank" rel="noopener" class="ty-btn ty-btn-outline"><svg><use href="#t-ext" xlink:href="#t-ext"></use></svg>Complete Registration Now</a>
     <a href="https://wa.me/919818934010?text=Hi%2C%20I%20just%20submitted%20my%20details%20for%20Longevity%20Revolution%202026." target="_blank" rel="noopener" class="ty-btn ty-btn-wa"><svg><use href="#t-chat" xlink:href="#t-chat"></use></svg>Chat With Us on WhatsApp</a>
@@ -193,6 +196,13 @@ a{text-decoration:none;color:inherit;}
       if(name){
         document.getElementById('ty-name').textContent = ', ' + name;
       }
+    }
+    // The landing page auto-downloads the brochure on submit, but that can be
+    // blocked. Surface a manual link whenever the visitor arrived via the
+    // brochure CTA so they always have a way to get the PDF.
+    if(params.get('brochure') === '1'){
+      var dl = document.getElementById('ty-brochure');
+      if(dl){ dl.hidden = false; }
     }
   }catch(e){ /* URLSearchParams unsupported - the generic greeting still reads fine */ }
 })();

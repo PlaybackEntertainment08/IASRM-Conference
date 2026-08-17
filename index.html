@@ -2098,6 +2098,16 @@
           />
           <path d="M12 5.5V19" stroke="currentColor" stroke-width="1.7" />
         </symbol>
+        <symbol id="i-download" viewBox="0 0 24 24">
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
+          />
+        </symbol>
         <symbol id="i-grad" viewBox="0 0 24 24">
           <path
             d="M12 4 2 8.5 12 13l10-4.5L12 4Z"
@@ -2397,7 +2407,7 @@
               <span class="lr-hero-meta-item"
                 ><svg class="lr-icon">
                   <use href="#i-cal" xlink:href="#i-cal"></use></svg
-                >25–27 September 2026</span
+                >25-26-27 September 2026</span
               >
               <span class="lr-hero-meta-item"
                 ><svg class="lr-icon">
@@ -2412,7 +2422,11 @@
             </div>
 
             <div class="lr-hero-ctas">
-              <a href="#registration" class="lr-btn lr-btn-gold"
+              <a
+                href="https://iasrmglobal.org/conference/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="lr-btn lr-btn-gold"
                 ><svg class="lr-icon">
                   <use href="#i-cal-check" xlink:href="#i-cal-check"></use></svg
                 >See Registration Rates</a
@@ -2422,6 +2436,17 @@
                   <use href="#i-journal" xlink:href="#i-journal"></use></svg
                 >View Scientific Agenda</a
               >
+              <button
+                type="button"
+                class="lr-btn lr-btn-outline-light"
+                data-bs-toggle="modal"
+                data-bs-target="#leadModal"
+                data-lead-mode="brochure"
+              >
+                <svg class="lr-icon">
+                  <use href="#i-download" xlink:href="#i-download"></use></svg
+                >Download Brochure
+              </button>
             </div>
 
             <div class="lr-countdown" aria-label="Countdown to congress">
@@ -2576,7 +2601,10 @@
 
         <div class="lr-stat-strip">
           <div class="lr-stat">
-            <span class="n">3</span><span class="l">Days of Congress</span>
+            <span class="n">2</span><span class="l">Days of Congress</span>
+          </div>
+          <div class="lr-stat">
+            <span class="n">1</span><span class="l">Day Hands-on Workshops</span>
           </div>
           <div class="lr-stat">
             <span class="n">100+</span><span class="l">Global Faculty</span>
@@ -2585,9 +2613,7 @@
             <span class="n">25+</span
             ><span class="l">Countries Represented</span>
           </div>
-          <div class="lr-stat">
-            <span class="n">3</span><span class="l">Hands-on Workshops</span>
-          </div>
+          
         </div>
       </div>
     </section>
@@ -2652,7 +2678,7 @@
                 </div>
                 <div>
                   <strong>25–27 September 2026</strong
-                  ><span>Three full congress days</span>
+                  ><span>Workshops 25 Sept · Conference 26–27 Sept</span>
                 </div>
               </div>
               <div class="lr-fact-row">
@@ -3211,7 +3237,7 @@
           </div>
           <div style="display: flex; align-items: center; gap: 1.4rem">
             <span class="lr-ws-bundle-price"
-              >₹1,00,000
+              >₹25,000
               <sup style="font-size: 0.6em; opacity: 0.6">+ GST</sup></span
             >
             <a
@@ -3849,7 +3875,7 @@
             <div class="lr-modal-head-inner">
               <span class="lr-eyebrow">11th IASRM World Congress</span>
               <h3 id="leadModalLabel">Reserve Your Seat</h3>
-              <p>
+              <p id="leadModalSub">
                 Longevity Revolution 2026 · 25–27 Sept · New Delhi. Share your
                 details and our team will call to confirm.
               </p>
@@ -3941,12 +3967,13 @@
                 >
                   <svg class="lr-icon">
                     <use
+                      id="leadSubmitIcon"
                       href="#i-cal-check"
                       xlink:href="#i-cal-check"
                     ></use></svg
-                  >Reserve My Seat
+                  ><span id="leadSubmitText">Reserve My Seat</span>
                 </button>
-                <p class="lr-form-privacy">
+                <p class="lr-form-privacy" id="leadFormPrivacy">
                   Your information is used only to contact you about this event.
                 </p>
               </div>
@@ -4102,6 +4129,84 @@
         // Change this if you host the thank-you page at a different path.
         var THANK_YOU_URL = "thank-you.html";
 
+        /* ---------- Brochure, gated behind the lead form ----------
+     The "Download Brochure" CTA opens the same lead modal in brochure mode.
+     The PDF is only handed over once the form validates and submits, so the
+     download always costs a lead. Note this is a front-end gate, not access
+     control: the file sits at a public URL and anyone who knows it can fetch
+     it directly. Move the PDF behind a signed/expiring link if that matters.
+     ------------------------------------------------------------------ */
+        var BROCHURE_URL = "Congress-Passport-CMYK-PRESS.pdf";
+        var BROCHURE_FILENAME = "IASRM-Longevity-Revolution-2026-Brochure.pdf";
+        var brochureMode = false;
+
+        var MODAL_COPY = {
+          seat: {
+            title: "Reserve Your Seat",
+            sub: "Longevity Revolution 2026 · 25–27 Sept · New Delhi. Share your details and our team will call to confirm.",
+            btn: "Reserve My Seat",
+            icon: "#i-cal-check",
+            privacy:
+              "Your information is used only to contact you about this event.",
+          },
+          brochure: {
+            title: "Download the Congress Brochure",
+            sub: "Longevity Revolution 2026 · 25–27 Sept · New Delhi. Fill in your details and the brochure downloads straight away.",
+            btn: "Get the Brochure",
+            icon: "#i-download",
+            privacy:
+              "Your information is used only to contact you about this event. The PDF downloads as soon as you submit.",
+          },
+        };
+
+        function setModalMode(mode) {
+          var copy = MODAL_COPY[mode] || MODAL_COPY.seat;
+          brochureMode = mode === "brochure";
+          var title = document.getElementById("leadModalLabel");
+          var sub = document.getElementById("leadModalSub");
+          var btn = document.getElementById("leadSubmitText");
+          var icon = document.getElementById("leadSubmitIcon");
+          var privacy = document.getElementById("leadFormPrivacy");
+          if (title) title.textContent = copy.title;
+          if (sub) sub.textContent = copy.sub;
+          if (btn) btn.textContent = copy.btn;
+          if (privacy) privacy.textContent = copy.privacy;
+          if (icon) {
+            icon.setAttribute("href", copy.icon);
+            icon.setAttributeNS(
+              "http://www.w3.org/1999/xlink",
+              "xlink:href",
+              copy.icon,
+            );
+          }
+        }
+
+        function triggerBrochureDownload() {
+          var a = document.createElement("a");
+          a.href = BROCHURE_URL;
+          a.setAttribute("download", BROCHURE_FILENAME);
+          a.rel = "noopener";
+          a.style.display = "none";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }
+
+        // Any trigger carrying data-lead-mode="brochure" flips the modal into
+        // brochure mode; every other opener (including the timed auto-popup,
+        // which has no relatedTarget) falls back to the seat wording.
+        var leadModalEl = document.getElementById("leadModal");
+        if (leadModalEl) {
+          leadModalEl.addEventListener("show.bs.modal", function (ev) {
+            var trigger = ev.relatedTarget;
+            var mode =
+              trigger && trigger.getAttribute("data-lead-mode") === "brochure"
+                ? "brochure"
+                : "seat";
+            setModalMode(mode);
+          });
+        }
+
         function collect(prefix) {
           function val(id) {
             var el = document.getElementById(prefix + id);
@@ -4128,6 +4233,10 @@
 
             var lead = collect(prefix);
 
+            // Only the modal form can be in brochure mode; the hero form never is.
+            var wantsBrochure = prefix === "lf-" && brochureMode;
+            if (wantsBrochure) triggerBrochureDownload();
+
             // TODO: send `lead` to your CRM / Google Sheet / WhatsApp API / email service.
             // Because this redirects immediately after, use sendBeacon (or await the fetch
             // before redirecting) so the request isn't cancelled by the page unload:
@@ -4142,9 +4251,11 @@
 
             // Pass the first name through so the thank-you page can greet them.
             var first = lead.name.split(" ")[0] || "";
+            var params = [];
+            if (first) params.push("name=" + encodeURIComponent(first));
+            if (wantsBrochure) params.push("brochure=1");
             var url =
-              THANK_YOU_URL +
-              (first ? "?name=" + encodeURIComponent(first) : "");
+              THANK_YOU_URL + (params.length ? "?" + params.join("&") : "");
 
             var btn = formEl.querySelector('button[type="submit"]');
             if (btn) {
@@ -4152,7 +4263,16 @@
               btn.style.opacity = ".65";
             }
 
-            window.location.href = url;
+            if (wantsBrochure) {
+              // Give the browser a moment to hand the PDF to its download
+              // manager — navigating instantly can cancel it. The thank-you
+              // page carries a manual link in case it still gets blocked.
+              setTimeout(function () {
+                window.location.href = url;
+              }, 1400);
+            } else {
+              window.location.href = url;
+            }
           });
         }
 
