@@ -524,7 +524,7 @@
       .lr-hero-grid {
         display: flex;
         flex-wrap: wrap;
-        gap: clamp(2rem, 4vw, 3.6rem);
+        gap: clamp(1.6rem, 2.6vw, 2.6rem);
         align-items: flex-start;
       }
       .lr-hero-left {
@@ -532,9 +532,9 @@
         min-width: 0;
       }
       .lr-hero-right {
-        flex: 1 1 370px;
+        flex: 1 1 340px;
         min-width: 0;
-        max-width: 500px;
+        max-width: 455px;
       }
 
       /* Hero lead form card */
@@ -611,8 +611,8 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 108px;
-        height: 108px;
+        width: 92px;
+        height: 92px;
         border-radius: 50%;
         background: #fff;
         border: 1px solid rgba(255, 217, 168, 0.5);
@@ -623,8 +623,8 @@
       }
       .lr-hero-brand img {
         display: block;
-        width: 93px;
-        height: 93px;
+        width: 79px;
+        height: 79px;
         object-fit: contain;
       }
       .lr-hero-top {
@@ -689,10 +689,11 @@
       }
 
       .lr-hero h1 {
-        font-size: clamp(2.85rem, 6.4vw, 5.6rem);
+        font-size: clamp(2.4rem, 5vw, 4.5rem);
         font-weight: 700;
         color: #fff;
         letter-spacing: -0.01em;
+        line-height: 1.04;
       }
       .lr-hero h1 em {
         font-style: italic;
@@ -700,10 +701,10 @@
         color: var(--aurum-light);
       }
       .lr-hero-sub {
-        font-size: clamp(1rem, 1.5vw, 1.22rem);
+        font-size: clamp(0.95rem, 1.2vw, 1.08rem);
         color: rgba(255, 255, 255, 0.78);
-        max-width: 620px;
-        margin-top: 1.4rem;
+        max-width: 600px;
+        margin-top: 1.2rem;
         line-height: 1.6;
         font-weight: 500;
       }
@@ -711,15 +712,15 @@
       .lr-hero-meta {
         display: flex;
         flex-wrap: wrap;
-        gap: 1.7rem;
-        margin-top: 1.9rem;
+        gap: 1.4rem;
+        margin-top: 1.6rem;
       }
       .lr-hero-meta-item {
         display: flex;
         align-items: center;
-        gap: 0.6rem;
+        gap: 0.55rem;
         font-family: var(--ff-mono);
-        font-size: 0.88rem;
+        font-size: 0.82rem;
         color: rgba(255, 255, 255, 0.88);
       }
       .lr-hero-meta-item i {
@@ -727,11 +728,34 @@
         font-size: 1.05rem;
       }
 
+      /* All three hero CTAs sit on one line, so they run tighter than the
+   page-wide .lr-btn. They still wrap rather than overflow once the column
+   gets too narrow for three. */
       .lr-hero-ctas {
         display: flex;
         flex-wrap: wrap;
-        gap: 1rem;
-        margin-top: 2.3rem;
+        gap: 0.6rem;
+        margin-top: 1.9rem;
+      }
+      .lr-hero-ctas .lr-btn {
+        font-size: 0.8rem;
+        padding: 0.72rem 0.95rem;
+        gap: 0.4rem;
+      }
+      .lr-hero-ctas .lr-btn .lr-icon {
+        width: 1em;
+        height: 1em;
+      }
+      /* Narrow desktops still show the hero two-up, but the column is too tight
+   for three iconed buttons — drop the icons rather than break the row. */
+      @media (min-width: 992px) and (max-width: 1199.98px) {
+        .lr-hero-ctas .lr-btn {
+          font-size: 0.72rem;
+          padding: 0.68rem 0.68rem;
+        }
+        .lr-hero-ctas .lr-btn .lr-icon {
+          display: none;
+        }
       }
 
       .lr-countdown {
