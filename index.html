@@ -4235,12 +4235,15 @@
         var THANK_YOU_URL = "thank-you.html";
 
         /* ---------- Google Sheet endpoint ----------
-     Paste the Apps Script Web App URL here — the one ending in /exec that
-     you get from Deploy > New deployment > Web app > Anyone. The script to
-     deploy is in apps-script/Code.gs, and the full steps are in its header.
+     Apps Script web app that appends each lead to the congress leads sheet.
+     The script itself lives in the IASRM Apps Script project on
+     playbackdigitalpro@gmail.com — edit it at script.google.com, and note
+     that changes only go live after Deploy > Manage deployments > New
+     version. Replace the URL below if you ever redeploy from scratch.
 
-     While this is empty the forms still validate, still hand over the
-     brochure and still reach the thank-you page — nothing is recorded.
+     Empty this string to switch lead capture off: the forms still validate,
+     still hand over the brochure and still reach the thank-you page, but
+     nothing is recorded and the console warns on every dropped lead.
      ------------------------------------------------------------------ */
         var LEAD_ENDPOINT =
           "https://script.google.com/macros/s/AKfycbzAlpxDsfqRG3HrnM5KWg-wca1gd1jvmeuJQO-bv-S1qpx6z2o4qc2gl0xAEMrulnQxFg/exec";
