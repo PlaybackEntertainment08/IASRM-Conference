@@ -4234,6 +4234,70 @@
         // Change this if you host the thank-you page at a different path.
         var THANK_YOU_URL = "thank-you.html";
 
+        /* ---------- Google Sheet endpoint ----------
+     Paste the Apps Script Web App URL here — the one ending in /exec that
+     you get from Deploy > New deployment > Web app > Anyone. The script to
+     deploy is in apps-script/Code.gs, and the full steps are in its header.
+
+     While this is empty the forms still validate, still hand over the
+     brochure and still reach the thank-you page — nothing is recorded.
+     ------------------------------------------------------------------ */
+        var LEAD_ENDPOINT = "";
+
+        /**
+         * Posts one lead to the sheet. Resolves either way: a submission that
+         * fails to record must not trap the visitor on the form, so callers
+         * carry on regardless and the failure is logged to the console.
+         *
+         * Sent as text/plain on purpose. That keeps it a "simple" CORS request,
+         * so the browser skips the preflight OPTIONS call that Apps Script has
+         * no way to answer. no-cors means the response is opaque — the promise
+         * settling tells us the request completed, not that the row was written.
+         */
+        function sendLead(lead) {
+          if (!LEAD_ENDPOINT) {
+            console.warn(
+              "LEAD_ENDPOINT is empty — this lead was not saved:",
+              lead,
+            );
+            return Promise.resolve(false);
+          }
+          if (typeof fetch !== "function") return Promise.resolve(false);
+
+          var done = false;
+          return new Promise(function (resolve) {
+            // Never hold the redirect longer than this, however slow the network.
+            var timer = setTimeout(function () {
+              if (!done) {
+                done = true;
+                console.warn("Lead POST timed out; continuing anyway.");
+                resolve(false);
+              }
+            }, 6000);
+
+            fetch(LEAD_ENDPOINT, {
+              method: "POST",
+              mode: "no-cors",
+              keepalive: true,
+              headers: { "Content-Type": "text/plain;charset=utf-8" },
+              body: JSON.stringify(lead),
+            })
+              .then(function () {
+                if (done) return;
+                done = true;
+                clearTimeout(timer);
+                resolve(true);
+              })
+              .catch(function (err) {
+                if (done) return;
+                done = true;
+                clearTimeout(timer);
+                console.error("Lead POST failed:", err);
+                resolve(false);
+              });
+          });
+        }
+
         /* ---------- Brochure, gated behind the lead form ----------
      The "Download Brochure" CTA opens the same lead modal in brochure mode.
      The PDF is only handed over once the form validates and submits, so the
@@ -4317,6 +4381,7 @@
             var el = document.getElementById(prefix + id);
             return el ? el.value.trim() : "";
           }
+          var consentEl = document.getElementById(prefix + "consent");
           return {
             name: val("name"),
             phone: val("phone"),
@@ -4324,6 +4389,16 @@
             city: val("city"),
             role: val("role"),
             interest: val("interest"),
+            consent: consentEl && consentEl.checked ? "Yes" : "No",
+            // Which of the three entry points this came from, so the sheet
+            // shows what is actually converting.
+            source:
+              prefix === "hf-"
+                ? "Hero form"
+                : brochureMode
+                  ? "Brochure download"
+                  : "Popup form",
+            page: window.location.href,
           };
         }
 
@@ -4341,13 +4416,6 @@
             // Only the modal form can be in brochure mode; the hero form never is.
             var wantsBrochure = prefix === "lf-" && brochureMode;
             if (wantsBrochure) triggerBrochureDownload();
-
-            // TODO: send `lead` to your CRM / Google Sheet / WhatsApp API / email service.
-            // Because this redirects immediately after, use sendBeacon (or await the fetch
-            // before redirecting) so the request isn't cancelled by the page unload:
-            //
-            // navigator.sendBeacon('https://your-endpoint.example.com/leads',
-            //   new Blob([JSON.stringify(lead)], {type:'application/json'}));
 
             // Fire lead events here if you track the submit itself as well as the
             // thank-you pageview:
@@ -4368,16 +4436,19 @@
               btn.style.opacity = ".65";
             }
 
-            if (wantsBrochure) {
-              // Give the browser a moment to hand the PDF to its download
-              // manager — navigating instantly can cancel it. The thank-you
-              // page carries a manual link in case it still gets blocked.
-              setTimeout(function () {
+            // Record the lead first, then move on. The brochure download needs
+            // a moment to reach the browser's download manager before we
+            // navigate, so that path waits a little longer; the thank-you page
+            // carries a manual link if it still gets blocked.
+            sendLead(lead).then(function () {
+              if (wantsBrochure) {
+                setTimeout(function () {
+                  window.location.href = url;
+                }, 900);
+              } else {
                 window.location.href = url;
-              }, 1400);
-            } else {
-              window.location.href = url;
-            }
+              }
+            });
           });
         }
 
