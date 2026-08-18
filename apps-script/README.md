@@ -6,8 +6,16 @@ appends a row to a Google Sheet.
 
 ## The sheet
 
-**IASRM Longevity Revolution 2026 — Website Leads**
-<https://docs.google.com/spreadsheets/d/1RAfJiZnqHJQbuUkvrQRriJ16q2K0QPbIu2NFgwbxmi0/edit>
+Create the leads spreadsheet in the **same Google account that runs the Apps
+Script**, then paste its id into `SHEET_ID` in `Code.gs`. A sheet owned by a
+different account cannot be opened by the script — that fails with a
+permission error and nothing is recorded.
+
+The id is the long string in the sheet's own URL, between `/d/` and `/edit`:
+
+```
+https://docs.google.com/spreadsheets/d/THIS_PART_HERE/edit
+```
 
 Columns: Timestamp · Name · WhatsApp · Email · City · I am a · Interested in ·
 Consent · Source · Page
@@ -18,11 +26,14 @@ converting.
 
 ## Turning it on
 
-1. Deploy `Code.gs` as a web app. The step-by-step is in the comment block at
-   the top of that file; it takes about two minutes and the sheet ID is
-   already filled in.
-2. Copy the deployment URL — it ends in `/exec`.
-3. Paste it into `LEAD_ENDPOINT` in `index.html`:
+1. Paste your sheet id into `SHEET_ID` in `Code.gs`.
+2. Run `setup` once from the editor and approve the authorisation prompt. It
+   writes the header row plus one test row, which proves the script can reach
+   the sheet.
+3. Deploy `Code.gs` as a web app — **Execute as: Me**, **Who has access:
+   Anyone**. Full steps are in the comment block at the top of the file.
+4. Copy the deployment URL — it ends in `/exec`.
+5. Paste it into `LEAD_ENDPOINT` in `index.html`:
 
    ```js
    var LEAD_ENDPOINT = "https://script.google.com/macros/s/AKfy…/exec";

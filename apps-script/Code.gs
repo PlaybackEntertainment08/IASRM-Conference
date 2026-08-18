@@ -30,8 +30,18 @@
  * ---------------------------------------------------------------------------
  */
 
-/** The leads spreadsheet. Already pointed at your sheet. */
-var SHEET_ID = '1RAfJiZnqHJQbuUkvrQRriJ16q2K0QPbIu2NFgwbxmi0';
+/**
+ * The leads spreadsheet, which must live in the SAME Google account that runs
+ * this script. Take the id from the sheet's own URL, the long string between
+ * /d/ and /edit:
+ *
+ *   https://docs.google.com/spreadsheets/d/THIS_PART_HERE/edit
+ *
+ * Leave it as '' only if this script is bound to a sheet (opened via
+ * Extensions > Apps Script from inside the spreadsheet), in which case the
+ * bound sheet is used automatically.
+ */
+var SHEET_ID = '';
 
 /** Tab inside that spreadsheet. Created automatically if missing. */
 var SHEET_NAME = 'Leads';
@@ -121,7 +131,27 @@ function setup() {
 
 /** Returns the leads tab, creating and formatting it on first use. */
 function getSheet_() {
-  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var ss;
+  if (SHEET_ID) {
+    try {
+      ss = SpreadsheetApp.openById(SHEET_ID);
+    } catch (err) {
+      // Nearly always one of two things: a typo in the id, or a sheet owned by
+      // a different Google account than the one running this script.
+      throw new Error(
+        'Cannot open the sheet with id "' + SHEET_ID + '". Check the id, and ' +
+        'make sure the sheet belongs to ' + Session.getEffectiveUser().getEmail() +
+        ' — the account this script runs as. Original error: ' + err);
+    }
+  } else {
+    ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (!ss) {
+      throw new Error(
+        'SHEET_ID is empty and this script is not bound to a spreadsheet. ' +
+        'Paste your sheet id into SHEET_ID near the top of this file.');
+    }
+  }
+
   var sheet = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
 
   if (sheet.getLastRow() === 0) {
