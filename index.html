@@ -2499,7 +2499,7 @@
                 class="lr-btn lr-btn-outline-light"
                 data-bs-toggle="modal"
                 data-bs-target="#leadModal"
-                data-lead-mode="brochure"
+                data-lead-doc="passport"
               >
                 <svg class="lr-icon">
                   <use href="#i-download" xlink:href="#i-download"></use></svg
@@ -3061,6 +3061,18 @@
             Explore the full scientific curriculum — from longevity fundamentals
             to advanced regenerative and cosmetic gynaecology techniques.
           </p>
+          <button
+            type="button"
+            class="lr-btn lr-btn-outline-dark"
+            style="margin-top: 1.4rem"
+            data-bs-toggle="modal"
+            data-bs-target="#leadModal"
+            data-lead-doc="programme"
+          >
+            <svg class="lr-icon">
+              <use href="#i-download" xlink:href="#i-download"></use></svg
+            >Download Scientific Programme
+          </button>
         </div>
 
         <ul class="nav lr-agenda-tabs" id="agendaTab" role="tablist">
@@ -4294,39 +4306,54 @@
           });
         }
 
-        /* ---------- Brochure, gated behind the lead form ----------
-     The "Download Brochure" CTA opens the same lead modal in brochure mode.
-     The PDF is only handed over once the form validates and submits, so the
-     download always costs a lead. Note this is a front-end gate, not access
-     control: the file sits at a public URL and anyone who knows it can fetch
-     it directly. Move the PDF behind a signed/expiring link if that matters.
-     ------------------------------------------------------------------ */
-        var BROCHURE_URL = "Congress-Passport-CMYK-PRESS.pdf";
-        var BROCHURE_FILENAME = "IASRM-Longevity-Revolution-2026-Brochure.pdf";
-        var brochureMode = false;
+        /* ---------- Documents, gated behind the lead form ----------
+     Each "Download" CTA opens the same lead modal, tagged with the document
+     it wants via data-lead-doc. The PDF is only handed over once the form
+     validates and submits, so a download always costs a lead.
 
-        var MODAL_COPY = {
-          seat: {
-            title: "Reserve Your Seat",
-            sub: "Longevity Revolution 2026 · 25–27 Sept · New Delhi. Share your details and our team will call to confirm.",
-            btn: "Reserve My Seat",
-            icon: "#i-cal-check",
+     Note this is a front-end gate, not access control: the files sit at
+     public URLs and anyone who knows them can fetch them directly. Real
+     gating needs the PDFs behind signed or expiring links.
+     ------------------------------------------------------------------ */
+        var DOCS = {
+          passport: {
+            url: "LR2026-Congress-Passport-CMYK-PRESS.pdf",
+            filename: "IASRM-LR2026-Congress-Passport.pdf",
+            title: "Download the Congress Passport",
+            sub: "Longevity Revolution 2026 · 25–27 Sept · New Delhi. The full congress programme, speaker directory and delegate guide. Fill in your details and it downloads straight away.",
+            btn: "Get the Passport",
+            icon: "#i-download",
             privacy:
-              "Your information is used only to contact you about this event.",
+              "Your information is used only to contact you about this event. The PDF downloads as soon as you submit.",
           },
-          brochure: {
-            title: "Download the Congress Brochure",
-            sub: "Longevity Revolution 2026 · 25–27 Sept · New Delhi. Fill in your details and the brochure downloads straight away.",
-            btn: "Get the Brochure",
+          programme: {
+            url: "LR2026-Scientific-Programme-CMYK-PRESS.pdf",
+            filename: "IASRM-LR2026-Scientific-Programme.pdf",
+            title: "Download the Scientific Programme",
+            sub: "Longevity Revolution 2026 · 25–27 Sept · New Delhi. Every session, speaker and timing across the three days. Fill in your details and it downloads straight away.",
+            btn: "Get the Programme",
             icon: "#i-download",
             privacy:
               "Your information is used only to contact you about this event. The PDF downloads as soon as you submit.",
           },
         };
 
-        function setModalMode(mode) {
-          var copy = MODAL_COPY[mode] || MODAL_COPY.seat;
-          brochureMode = mode === "brochure";
+        // Which document the open modal is collecting for; null means the
+        // visitor is just reserving a seat.
+        var requestedDoc = null;
+
+        var SEAT_COPY = {
+          title: "Reserve Your Seat",
+          sub: "Longevity Revolution 2026 · 25–27 Sept · New Delhi. Share your details and our team will call to confirm.",
+          btn: "Reserve My Seat",
+          icon: "#i-cal-check",
+          privacy:
+            "Your information is used only to contact you about this event.",
+        };
+
+        function setModalMode(docKey) {
+          var copy = DOCS[docKey] || SEAT_COPY;
+          requestedDoc = DOCS[docKey] ? docKey : null;
           var title = document.getElementById("leadModalLabel");
           var sub = document.getElementById("leadModalSub");
           var btn = document.getElementById("leadSubmitText");
@@ -4346,10 +4373,12 @@
           }
         }
 
-        function triggerBrochureDownload() {
+        function triggerDocDownload(docKey) {
+          var doc = DOCS[docKey];
+          if (!doc) return;
           var a = document.createElement("a");
-          a.href = BROCHURE_URL;
-          a.setAttribute("download", BROCHURE_FILENAME);
+          a.href = doc.url;
+          a.setAttribute("download", doc.filename);
           a.rel = "noopener";
           a.style.display = "none";
           document.body.appendChild(a);
@@ -4357,18 +4386,14 @@
           document.body.removeChild(a);
         }
 
-        // Any trigger carrying data-lead-mode="brochure" flips the modal into
-        // brochure mode; every other opener (including the timed auto-popup,
-        // which has no relatedTarget) falls back to the seat wording.
+        // A trigger carrying data-lead-doc switches the modal to that document;
+        // every other opener (including the timed auto-popup, which has no
+        // relatedTarget) falls back to the seat wording.
         var leadModalEl = document.getElementById("leadModal");
         if (leadModalEl) {
           leadModalEl.addEventListener("show.bs.modal", function (ev) {
             var trigger = ev.relatedTarget;
-            var mode =
-              trigger && trigger.getAttribute("data-lead-mode") === "brochure"
-                ? "brochure"
-                : "seat";
-            setModalMode(mode);
+            setModalMode(trigger && trigger.getAttribute("data-lead-doc"));
           });
         }
 
@@ -4386,14 +4411,16 @@
             role: val("role"),
             interest: val("interest"),
             consent: consentEl && consentEl.checked ? "Yes" : "No",
-            // Which of the three entry points this came from, so the sheet
-            // shows what is actually converting.
+            // Which entry point this came from, so the sheet shows what is
+            // actually converting — and which document was asked for.
             source:
               prefix === "hf-"
                 ? "Hero form"
-                : brochureMode
-                  ? "Brochure download"
-                  : "Popup form",
+                : requestedDoc === "passport"
+                  ? "Congress Passport download"
+                  : requestedDoc === "programme"
+                    ? "Scientific Programme download"
+                    : "Popup form",
             page: window.location.href,
           };
         }
@@ -4409,9 +4436,9 @@
 
             var lead = collect(prefix);
 
-            // Only the modal form can be in brochure mode; the hero form never is.
-            var wantsBrochure = prefix === "lf-" && brochureMode;
-            if (wantsBrochure) triggerBrochureDownload();
+            // Only the modal form can request a document; the hero form never does.
+            var wantsDoc = prefix === "lf-" ? requestedDoc : null;
+            if (wantsDoc) triggerDocDownload(wantsDoc);
 
             // Fire lead events here if you track the submit itself as well as the
             // thank-you pageview:
@@ -4422,7 +4449,7 @@
             var first = lead.name.split(" ")[0] || "";
             var params = [];
             if (first) params.push("name=" + encodeURIComponent(first));
-            if (wantsBrochure) params.push("brochure=1");
+            if (wantsDoc) params.push("doc=" + encodeURIComponent(wantsDoc));
             var url =
               THANK_YOU_URL + (params.length ? "?" + params.join("&") : "");
 
@@ -4432,12 +4459,12 @@
               btn.style.opacity = ".65";
             }
 
-            // Record the lead first, then move on. The brochure download needs
+            // Record the lead first, then move on. A document download needs
             // a moment to reach the browser's download manager before we
             // navigate, so that path waits a little longer; the thank-you page
-            // carries a manual link if it still gets blocked.
+            // carries manual links if it still gets blocked.
             sendLead(lead).then(function () {
-              if (wantsBrochure) {
+              if (wantsDoc) {
                 setTimeout(function () {
                   window.location.href = url;
                 }, 900);

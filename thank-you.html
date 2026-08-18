@@ -169,7 +169,8 @@ a{text-decoration:none;color:inherit;}
   </section>
 
   <div class="ty-actions">
-    <a href="Congress-Passport-CMYK-PRESS.pdf" download="IASRM-Longevity-Revolution-2026-Brochure.pdf" id="ty-brochure" class="ty-btn ty-btn-primary" hidden><svg><use href="#t-dl" xlink:href="#t-dl"></use></svg>Download Brochure</a>
+    <a href="LR2026-Congress-Passport-CMYK-PRESS.pdf" download="IASRM-LR2026-Congress-Passport.pdf" id="ty-passport" class="ty-btn ty-btn-primary" hidden><svg><use href="#t-dl" xlink:href="#t-dl"></use></svg>Download Congress Passport</a>
+    <a href="LR2026-Scientific-Programme-CMYK-PRESS.pdf" download="IASRM-LR2026-Scientific-Programme.pdf" id="ty-programme" class="ty-btn ty-btn-outline" hidden><svg><use href="#t-dl" xlink:href="#t-dl"></use></svg>Download Scientific Programme</a>
     <a href="index.html" class="ty-btn ty-btn-primary"><svg><use href="#t-home" xlink:href="#t-home"></use></svg>Return to Home</a>
     <a href="https://iasrmglobal.org/conference/register/conference/1/" target="_blank" rel="noopener" class="ty-btn ty-btn-outline"><svg><use href="#t-ext" xlink:href="#t-ext"></use></svg>Complete Registration Now</a>
     <a href="https://wa.me/919810418415?text=Hi%2C%20I%20just%20submitted%20my%20details%20for%20Longevity%20Revolution%202026." target="_blank" rel="noopener" class="ty-btn ty-btn-wa"><svg><use href="#t-chat" xlink:href="#t-chat"></use></svg>Chat With Us on WhatsApp</a>
@@ -197,12 +198,22 @@ a{text-decoration:none;color:inherit;}
         document.getElementById('ty-name').textContent = ', ' + name;
       }
     }
-    // The landing page auto-downloads the brochure on submit, but that can be
-    // blocked. Surface a manual link whenever the visitor arrived via the
-    // brochure CTA so they always have a way to get the PDF.
-    if(params.get('brochure') === '1'){
-      var dl = document.getElementById('ty-brochure');
-      if(dl){ dl.hidden = false; }
+    // The landing page auto-downloads the requested document on submit, but
+    // that can be blocked. Anyone who arrived via a download CTA has already
+    // paid with their details, so surface both PDFs here — with the one they
+    // actually asked for listed first.
+    var doc = params.get('doc');
+    if(doc === 'passport' || doc === 'programme'){
+      var passport = document.getElementById('ty-passport');
+      var programme = document.getElementById('ty-programme');
+      if(passport){ passport.hidden = false; }
+      if(programme){ programme.hidden = false; }
+      if(doc === 'programme' && passport && programme){
+        // Lead with the requested document, and carry the primary styling.
+        programme.parentNode.insertBefore(programme, passport);
+        programme.className = 'ty-btn ty-btn-primary';
+        passport.className = 'ty-btn ty-btn-outline';
+      }
     }
   }catch(e){ /* URLSearchParams unsupported - the generic greeting still reads fine */ }
 })();
