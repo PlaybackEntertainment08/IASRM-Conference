@@ -113,6 +113,13 @@ a{text-decoration:none;color:inherit;}
   transition:transform .22s ease,background .22s ease,color .22s ease,border-color .22s ease;cursor:pointer;
 }
 .ty-btn[hidden]{display:none;} /* display:inline-flex above would otherwise beat the hidden attribute */
+.ty-doc-notice{
+  background:#fff6ea;border:1px solid #f0d9b8;border-radius:12px;
+  padding:.95rem 1.1rem;margin-top:1.4rem;font-size:.88rem;line-height:1.55;
+  color:var(--slate);text-align:left;
+}
+.ty-doc-notice strong{display:block;color:var(--ink);margin-bottom:.2rem;}
+.ty-doc-notice[hidden]{display:none;}
 .ty-btn svg{width:1.05em;height:1.05em;flex:none;}
 .ty-btn-primary{background:var(--regen);color:#fff;box-shadow:0 14px 30px -12px rgba(156,24,86,.55);}
 .ty-btn-primary:hover{background:var(--regen-dark);color:#fff;transform:translateY(-2px);}
@@ -153,11 +160,18 @@ a{text-decoration:none;color:inherit;}
   <h1>Thank you<span id="ty-name"></span>!</h1>
   <p class="ty-lede">Your details are with the Longevity Revolution 2026 team. We&rsquo;ll reach out shortly to confirm your seat at the 11th IASRM World Congress &mdash; 25&ndash;27 September 2026, New Delhi.</p>
 
+  <p class="ty-doc-notice" id="ty-doc-notice" hidden>
+    <strong>Your documents are in your inbox.</strong>
+    Nothing downloads from this page &mdash; open the email we just sent and
+    click <em>Confirm and get my documents</em>. The link stays valid, so keep
+    the email if you want them again later.
+  </p>
+
   <section class="ty-next">
     <h2>What happens next</h2>
     <div class="ty-step">
       <span class="ty-step-n">1</span>
-      <p><strong>Check your inbox</strong>We&rsquo;ve emailed your documents and a link to confirm your address &mdash; one click, and we know how to reach you.</p>
+      <p><strong>Check your inbox</strong>We&rsquo;ve emailed you a confirmation link &mdash; one click confirms your address and opens your documents.</p>
     </div>
     <div class="ty-step">
       <span class="ty-step-n">2</span>
@@ -174,8 +188,7 @@ a{text-decoration:none;color:inherit;}
   </section>
 
   <div class="ty-actions">
-    <a href="LR2026-Congress-Passport-CMYK-PRESS.pdf" download="IASRM-LR2026-Congress-Passport.pdf" id="ty-passport" class="ty-btn ty-btn-primary" hidden><svg><use href="#t-dl" xlink:href="#t-dl"></use></svg>Download Congress Passport</a>
-    <a href="LR2026-Scientific-Programme-CMYK-PRESS.pdf" download="IASRM-LR2026-Scientific-Programme.pdf" id="ty-programme" class="ty-btn ty-btn-outline" hidden><svg><use href="#t-dl" xlink:href="#t-dl"></use></svg>Download Scientific Programme</a>
+    <a href="https://mail.google.com/" target="_blank" rel="noopener" id="ty-inbox" class="ty-btn ty-btn-primary" hidden><svg><use href="#t-dl" xlink:href="#t-dl"></use></svg>Open my inbox</a>
     <a href="index.html" class="ty-btn ty-btn-primary"><svg><use href="#t-home" xlink:href="#t-home"></use></svg>Return to Home</a>
     <a href="https://iasrmglobal.org/conference/register/conference/1/" target="_blank" rel="noopener" class="ty-btn ty-btn-outline"><svg><use href="#t-ext" xlink:href="#t-ext"></use></svg>Complete Registration Now</a>
     <a href="https://wa.me/919810418415?text=Hi%2C%20I%20just%20submitted%20my%20details%20for%20Longevity%20Revolution%202026." target="_blank" rel="noopener" class="ty-btn ty-btn-wa"><svg><use href="#t-chat" xlink:href="#t-chat"></use></svg>Chat With Us on WhatsApp</a>
@@ -203,22 +216,15 @@ a{text-decoration:none;color:inherit;}
         document.getElementById('ty-name').textContent = ', ' + name;
       }
     }
-    // The landing page auto-downloads the requested document on submit, but
-    // that can be blocked. Anyone who arrived via a download CTA has already
-    // paid with their details, so surface both PDFs here — with the one they
-    // actually asked for listed first.
+    // Documents are released by the confirm link in the email, never from
+    // this page. Someone who asked for one gets pointed at their inbox
+    // instead, and the notice explains why nothing downloaded.
     var doc = params.get('doc');
     if(doc === 'passport' || doc === 'programme'){
-      var passport = document.getElementById('ty-passport');
-      var programme = document.getElementById('ty-programme');
-      if(passport){ passport.hidden = false; }
-      if(programme){ programme.hidden = false; }
-      if(doc === 'programme' && passport && programme){
-        // Lead with the requested document, and carry the primary styling.
-        programme.parentNode.insertBefore(programme, passport);
-        programme.className = 'ty-btn ty-btn-primary';
-        passport.className = 'ty-btn ty-btn-outline';
-      }
+      var inbox = document.getElementById('ty-inbox');
+      var notice = document.getElementById('ty-doc-notice');
+      if(inbox){ inbox.hidden = false; }
+      if(notice){ notice.hidden = false; }
     }
   }catch(e){ /* URLSearchParams unsupported - the generic greeting still reads fine */ }
 })();

@@ -2511,8 +2511,8 @@
                 data-lead-doc="passport"
               >
                 <svg class="lr-icon">
-                  <use href="#i-download" xlink:href="#i-download"></use></svg
-                >Download Brochure
+                  <use href="#i-mail" xlink:href="#i-mail"></use></svg
+                >Get the Brochure
               </button>
             </div>
 
@@ -3109,8 +3109,8 @@
             data-lead-doc="programme"
           >
             <svg class="lr-icon">
-              <use href="#i-download" xlink:href="#i-download"></use></svg
-            >Download Scientific Programme
+              <use href="#i-mail" xlink:href="#i-mail"></use></svg
+            >Get the Scientific Programme
           </button>
         </div>
 
@@ -4345,35 +4345,31 @@
           });
         }
 
-        /* ---------- Documents, gated behind the lead form ----------
-     Each "Download" CTA opens the same lead modal, tagged with the document
-     it wants via data-lead-doc. The PDF is only handed over once the form
-     validates and submits, so a download always costs a lead.
+        /* ---------- Documents, gated behind email verification ----------
+     Each CTA opens the same lead modal, tagged with the document it wants
+     via data-lead-doc. Submitting hands over nothing: the Apps Script emails
+     a confirm link, and the documents are only revealed once that link is
+     clicked. An address that cannot receive mail gets no PDF.
 
-     Note this is a front-end gate, not access control: the files sit at
-     public URLs and anyone who knows them can fetch them directly. Real
-     gating needs the PDFs behind signed or expiring links.
+     The files themselves live in Drive on unguessable links rather than on
+     this site, so there is no predictable URL to try.
      ------------------------------------------------------------------ */
         var DOCS = {
           passport: {
-            url: "LR2026-Congress-Passport-CMYK-PRESS.pdf",
-            filename: "IASRM-LR2026-Congress-Passport.pdf",
-            title: "Download the Congress Passport",
-            sub: "Longevity Revolution 2026 · 25–27 Sept · New Delhi. The full congress programme, speaker directory and delegate guide. Fill in your details and it downloads straight away.",
-            btn: "Get the Passport",
-            icon: "#i-download",
+            title: "Get the Congress Passport",
+            sub: "Longevity Revolution 2026 · 25–27 Sept · New Delhi. The full congress programme, speaker directory and delegate guide. We email you a link — one click and it opens.",
+            btn: "Email me the Passport",
+            icon: "#i-mail",
             privacy:
-              "Your information is used only to contact you about this event. The PDF downloads as soon as you submit.",
+              "Your information is used only to contact you about this event. Check your inbox: the documents open from the confirmation link.",
           },
           programme: {
-            url: "LR2026-Scientific-Programme-CMYK-PRESS.pdf",
-            filename: "IASRM-LR2026-Scientific-Programme.pdf",
-            title: "Download the Scientific Programme",
-            sub: "Longevity Revolution 2026 · 25–27 Sept · New Delhi. Every session, speaker and timing across the three days. Fill in your details and it downloads straight away.",
-            btn: "Get the Programme",
-            icon: "#i-download",
+            title: "Get the Scientific Programme",
+            sub: "Longevity Revolution 2026 · 25–27 Sept · New Delhi. Every session, speaker and timing across the three days. We email you a link — one click and it opens.",
+            btn: "Email me the Programme",
+            icon: "#i-mail",
             privacy:
-              "Your information is used only to contact you about this event. The PDF downloads as soon as you submit.",
+              "Your information is used only to contact you about this event. Check your inbox: the documents open from the confirmation link.",
           },
         };
 
@@ -4410,19 +4406,6 @@
               copy.icon,
             );
           }
-        }
-
-        function triggerDocDownload(docKey) {
-          var doc = DOCS[docKey];
-          if (!doc) return;
-          var a = document.createElement("a");
-          a.href = doc.url;
-          a.setAttribute("download", doc.filename);
-          a.rel = "noopener";
-          a.style.display = "none";
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
         }
 
         // A trigger carrying data-lead-doc switches the modal to that document;
@@ -4476,8 +4459,9 @@
             var lead = collect(prefix);
 
             // Only the modal form can request a document; the hero form never does.
+            // Nothing is handed over here: the documents are released by the
+            // confirm link in the email, so an unverified address gets nothing.
             var wantsDoc = prefix === "lf-" ? requestedDoc : null;
-            if (wantsDoc) triggerDocDownload(wantsDoc);
 
             // Fire lead events here if you track the submit itself as well as the
             // thank-you pageview:
@@ -4503,13 +4487,7 @@
             // navigate, so that path waits a little longer; the thank-you page
             // carries manual links if it still gets blocked.
             sendLead(lead).then(function () {
-              if (wantsDoc) {
-                setTimeout(function () {
-                  window.location.href = url;
-                }, 900);
-              } else {
-                window.location.href = url;
-              }
+              window.location.href = url;
             });
           });
         }
